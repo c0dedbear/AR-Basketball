@@ -61,7 +61,7 @@ extension ViewController {
     @IBAction func screenTapped(_ sender: UITapGestureRecognizer) {
         
         if isHoopPlaced {
-            //TODO Implement throwing balls
+            createBasketball()
         } else {
         let location = sender.location(in: sceneView)
         guard let result = sceneView.hitTest(location, types: [.existingPlaneUsingExtent]).first else { return }
@@ -91,7 +91,9 @@ extension ViewController {
         
         hoopNode.simdTransform = result.worldTransform //перезаписывает все параметры, поэтому код ниже под этой строчкой
         hoopNode.eulerAngles.x -= .pi / 2
-        hoopNode.scale = SCNVector3(0.2, 0.2, 0.2)
+        //hoopNode.scale = SCNVector3(0.2, 0.2, 0.2)
+        
+        hoopNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(node: hoopNode, options: [SCNPhysicsShape.Option.type: SCNPhysicsShape.ShapeType.concavePolyhedron]))
         
         //remove all nodes named "Wall"
         sceneView.scene.rootNode.enumerateChildNodes { node, _ in
@@ -103,6 +105,34 @@ extension ViewController {
         //Add the hoop to the scene
         sceneView.scene.rootNode.addChildNode(hoopNode)
         isHoopPlaced = true
+    }
+    
+    /// Creaate ball for throwing
+    func createBasketball() {
+        //текущий кадр
+        guard let frame = sceneView.session.currentFrame else { return }
+        
+        let ball = SCNNode(geometry: SCNSphere(radius: 0.25))
+        ball.geometry?.firstMaterial?.diffuse.contents = UIImage(named: "ball")
+        
+        let cameraTransform = SCNMatrix4(frame.camera.transform)
+        ball.transform = cameraTransform
+       // ball.scale = SCNVector3(0.2, 0.2, 0.2)
+        
+        let physicsBody = SCNPhysicsBody(type: .dynamic, shape: SCNPhysicsShape(node: ball))
+        ball.physicsBody = physicsBody
+        
+
+        let throwPower = Float(10)
+        let x = -cameraTransform.m31 * throwPower
+        let y = -cameraTransform.m32 * throwPower
+        let z = -cameraTransform.m33 * throwPower
+        
+        let throwForce = SCNVector3(x, y, z)
+        ball.physicsBody?.applyForce(throwForce, asImpulse: true)
+        
+        
+        sceneView.scene.rootNode.addChildNode(ball)
     }
     
 }
@@ -128,7 +158,11 @@ extension ViewController: ARSCNViewDelegate {
         
         node.addChildNode(planeNode)
         planeCounter += 1
-        print(#line, #function, "Plane added \(planeCounter)")
+
+    }
+    
+    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
+        //TODO удалить лишние мячи ( по прошествии времени, либо по опредленному количеству)
     }
 
 }
