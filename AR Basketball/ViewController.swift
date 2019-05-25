@@ -11,12 +11,13 @@ import SceneKit
 import ARKit
 
 class ViewController: UIViewController {
-
+    
     @IBOutlet var sceneView: ARSCNView!
+    var ballsCounter = 0
     
     var isHoopPlaced = false
     var planeCounter = 0
-
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,8 +28,8 @@ class ViewController: UIViewController {
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
         
+        //enable auto light
         sceneView.autoenablesDefaultLighting = true
-        
         
     }
     
@@ -40,7 +41,7 @@ class ViewController: UIViewController {
         
         //Allow vertical plane detection
         configuration.planeDetection = [.vertical]
-
+        
         // Run the view's session
         sceneView.session.run(configuration)
     }
@@ -51,7 +52,7 @@ class ViewController: UIViewController {
         // Pause the view's session
         sceneView.session.pause()
     }
-
+    
 }
 
 
@@ -63,11 +64,11 @@ extension ViewController {
         if isHoopPlaced {
             createBasketball()
         } else {
-        let location = sender.location(in: sceneView)
-        guard let result = sceneView.hitTest(location, types: [.existingPlaneUsingExtent]).first else { return }
-        
-        addHopp(at: result)
-        print(#function, #line ,"Found existing plane")
+            let location = sender.location(in: sceneView)
+            guard let result = sceneView.hitTest(location, types: [.existingPlaneUsingExtent]).first else { return }
+            
+            addHopp(at: result)
+            print(#function, #line ,"Found existing plane")
         }
         
     }
@@ -84,15 +85,8 @@ extension ViewController {
         
         guard let hoopNode = hoopScene?.rootNode.childNode(withName: "Hoop", recursively: false) else { return }
         
-        //TODO: PLACE THE HOOP IN CORRECT POSTION
-        
-//        let planePosition = result.worldTransform.columns.3
-//        hoopNode.position = SCNVector3(planePosition.x, planePosition.y, planePosition.z)
-        
         hoopNode.simdTransform = result.worldTransform //перезаписывает все параметры, поэтому код ниже под этой строчкой
         hoopNode.eulerAngles.x -= .pi / 2
-        //hoopNode.scale = SCNVector3(0.2, 0.2, 0.2)
-        
         hoopNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(node: hoopNode, options: [SCNPhysicsShape.Option.type: SCNPhysicsShape.ShapeType.concavePolyhedron]))
         
         //remove all nodes named "Wall"
@@ -114,15 +108,16 @@ extension ViewController {
         
         let ball = SCNNode(geometry: SCNSphere(radius: 0.25))
         ball.geometry?.firstMaterial?.diffuse.contents = UIImage(named: "ball")
+        ball.name = "Ball"
         
         let cameraTransform = SCNMatrix4(frame.camera.transform)
         ball.transform = cameraTransform
-       // ball.scale = SCNVector3(0.2, 0.2, 0.2)
+        // ball.scale = SCNVector3(0.2, 0.2, 0.2)
         
         let physicsBody = SCNPhysicsBody(type: .dynamic, shape: SCNPhysicsShape(node: ball))
         ball.physicsBody = physicsBody
         
-
+        
         let throwPower = Float(10)
         let x = -cameraTransform.m31 * throwPower
         let y = -cameraTransform.m32 * throwPower
@@ -158,11 +153,25 @@ extension ViewController: ARSCNViewDelegate {
         
         node.addChildNode(planeNode)
         planeCounter += 1
-
+        
+        
     }
     
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
-        //TODO удалить лишние мячи ( по прошествии времени, либо по опредленному количеству)
+        
+        /// Remove balls from scene
+        let length: Float = -50
+        
+        sceneView.scene.rootNode.enumerateChildNodes { node, _ in
+            if node.name == "Ball" {
+                if node.presentation.position.y < length {
+                    node.removeFromParentNode()
+                    print("Ball removed frome scene")
+                }
+            }
+        }
+        
     }
-
+    
+    
 }
