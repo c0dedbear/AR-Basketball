@@ -92,10 +92,18 @@ extension ViewController {
         hoopNode.eulerAngles.x -= .pi / 2
         hoopNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(node: hoopNode, options: [SCNPhysicsShape.Option.type: SCNPhysicsShape.ShapeType.concavePolyhedron]))
         
-        ///create cheking planes for score counting
+        ///define checking planes for score counting
         guard let topPlane = hoopScene?.rootNode.childNode(withName: "Top plane", recursively: false) else { return }
         guard let bottomPlane = hoopScene?.rootNode.childNode(withName: "Bottom plane", recursively: false) else { return }
+        guard let rim = hoopScene?.rootNode.childNode(withName: "rim", recursively: true) else { return }
         
+        //add the same position that rim set
+        topPlane.worldPosition = rim.worldPosition
+        topPlane.position.y += 0.1
+        bottomPlane.worldPosition = topPlane.worldPosition
+        bottomPlane.position.y -= 0.6
+        
+        //setup physics bodies
         topPlane.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(node: topPlane, options: [SCNPhysicsShape.Option.type: SCNPhysicsShape.ShapeType.concavePolyhedron]))
         bottomPlane.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(node: bottomPlane, options: [SCNPhysicsShape.Option.type: SCNPhysicsShape.ShapeType.concavePolyhedron]))
         
@@ -106,7 +114,7 @@ extension ViewController {
         bottomPlane.physicsBody!.categoryBitMask = ObjectCollisionCategory.bottomPlane.rawValue
         bottomPlane.physicsBody!.collisionBitMask = ObjectCollisionCategory.none.rawValue
         bottomPlane.physicsBody!.contactTestBitMask = ObjectCollisionCategory.ball.rawValue
- 
+        
         //remove all nodes named "Wall"
         sceneView.scene.rootNode.enumerateChildNodes { node, _ in
             if node.name == "Wall" {
@@ -121,8 +129,8 @@ extension ViewController {
         isHoopPlaced = true
     }
     
-   
-
+    
+    
     /// Creaate ball for throwing
     func createBasketball() {
         //текущий кадр
@@ -139,7 +147,7 @@ extension ViewController {
         ball.physicsBody = physicsBody
         physicsBody.categoryBitMask = ObjectCollisionCategory.ball.rawValue
         physicsBody.contactTestBitMask = ObjectCollisionCategory.topPlane.rawValue | ObjectCollisionCategory.bottomPlane.rawValue
-       
+        
         
         let throwPower = Float(10)
         let x = -cameraTransform.m31 * throwPower
@@ -209,8 +217,8 @@ extension ViewController: SCNPhysicsContactDelegate {
     func physicsWorld(_ world: SCNPhysicsWorld, didBegin contact: SCNPhysicsContact) {
         guard let nodeABitMask = contact.nodeA.physicsBody?.categoryBitMask else { return }
         guard let nodeBBitMask = contact.nodeB.physicsBody?.categoryBitMask else { return }
-       
-        print("\(contact.nodeA.name!)(category bitmask is \(nodeABitMask)) contacts with \(contact.nodeB.name!)(category bitmask is \(nodeBBitMask))")
+        
+        print(Date(), #function, "\(contact.nodeA.name!)(category bitmask is \(nodeABitMask)) contacts with \(contact.nodeB.name!)(category bitmask is \(nodeBBitMask))")
     }
     
 }
