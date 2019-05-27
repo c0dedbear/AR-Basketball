@@ -13,17 +13,20 @@ import ARKit
 class ViewController: UIViewController {
     
     @IBOutlet var sceneView: ARSCNView!
+    
     var ballsCounter = 0
+    var score = 0
     
     var isHoopPlaced = false
-    var planeCounter = 0
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // Set the view's delegate
         sceneView.delegate = self
+        
+        //set the contact delegate
+        sceneView.scene.physicsWorld.contactDelegate = self
         
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
@@ -89,6 +92,21 @@ extension ViewController {
         hoopNode.eulerAngles.x -= .pi / 2
         hoopNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(node: hoopNode, options: [SCNPhysicsShape.Option.type: SCNPhysicsShape.ShapeType.concavePolyhedron]))
         
+        ///create cheking planes for score counting
+        guard let topPlane = hoopScene?.rootNode.childNode(withName: "Top plane", recursively: false) else { return }
+        guard let bottomPlane = hoopScene?.rootNode.childNode(withName: "Bottom plane", recursively: false) else { return }
+        
+        topPlane.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(node: topPlane, options: [SCNPhysicsShape.Option.type: SCNPhysicsShape.ShapeType.concavePolyhedron]))
+        bottomPlane.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(node: bottomPlane, options: [SCNPhysicsShape.Option.type: SCNPhysicsShape.ShapeType.concavePolyhedron]))
+        
+        topPlane.physicsBody!.categoryBitMask = ObjectCollisionCategory.topPlane.rawValue
+        topPlane.physicsBody!.collisionBitMask = ObjectCollisionCategory.none.rawValue
+        topPlane.physicsBody!.contactTestBitMask = ObjectCollisionCategory.ball.rawValue
+        
+        bottomPlane.physicsBody!.categoryBitMask = ObjectCollisionCategory.bottomPlane.rawValue
+        bottomPlane.physicsBody!.collisionBitMask = ObjectCollisionCategory.none.rawValue
+        bottomPlane.physicsBody!.contactTestBitMask = ObjectCollisionCategory.ball.rawValue
+ 
         //remove all nodes named "Wall"
         sceneView.scene.rootNode.enumerateChildNodes { node, _ in
             if node.name == "Wall" {
@@ -97,10 +115,14 @@ extension ViewController {
         }
         
         //Add the hoop to the scene
+        sceneView.scene.rootNode.addChildNode(topPlane)
+        sceneView.scene.rootNode.addChildNode(bottomPlane)
         sceneView.scene.rootNode.addChildNode(hoopNode)
         isHoopPlaced = true
     }
     
+   
+
     /// Creaate ball for throwing
     func createBasketball() {
         //текущий кадр
@@ -112,11 +134,12 @@ extension ViewController {
         
         let cameraTransform = SCNMatrix4(frame.camera.transform)
         ball.transform = cameraTransform
-        // ball.scale = SCNVector3(0.2, 0.2, 0.2)
         
         let physicsBody = SCNPhysicsBody(type: .dynamic, shape: SCNPhysicsShape(node: ball))
         ball.physicsBody = physicsBody
-        
+        physicsBody.categoryBitMask = ObjectCollisionCategory.ball.rawValue
+        physicsBody.contactTestBitMask = ObjectCollisionCategory.topPlane.rawValue | ObjectCollisionCategory.bottomPlane.rawValue
+       
         
         let throwPower = Float(10)
         let x = -cameraTransform.m31 * throwPower
@@ -128,6 +151,21 @@ extension ViewController {
         
         
         sceneView.scene.rootNode.addChildNode(ball)
+        ballsCounter += 1
+    }
+    
+    /// Remove node with name from scene when it's fall down
+    ///
+    /// - Parameters:
+    ///   - node: SCNNode
+    ///   - fallLengh: Float
+    func removeFromScene(_ node: SCNNode, fallLengh: Float) {
+        if node.presentation.position.y < fallLengh {
+            node.removeFromParentNode()
+            if let name = node.name {
+                print("\(name) removed frome scene")
+            }
+        }
     }
     
 }
@@ -152,26 +190,27 @@ extension ViewController: ARSCNViewDelegate {
         planeNode.opacity = 0.125
         
         node.addChildNode(planeNode)
-        planeCounter += 1
-        
         
     }
     
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
         
-        /// Remove balls from scene
-        let length: Float = -50
-        
         sceneView.scene.rootNode.enumerateChildNodes { node, _ in
             if node.name == "Ball" {
-                if node.presentation.position.y < length {
-                    node.removeFromParentNode()
-                    print("Ball removed frome scene")
-                }
+                removeFromScene(node, fallLengh: -50)
             }
         }
-        
     }
+}
+
+// MARK: - SCNPhysicsContactDelegate
+extension ViewController: SCNPhysicsContactDelegate {
     
+    func physicsWorld(_ world: SCNPhysicsWorld, didBegin contact: SCNPhysicsContact) {
+        guard let nodeABitMask = contact.nodeA.physicsBody?.categoryBitMask else { return }
+        guard let nodeBBitMask = contact.nodeB.physicsBody?.categoryBitMask else { return }
+       
+        print("\(contact.nodeA.name!)(category bitmask is \(nodeABitMask)) contacts with \(contact.nodeB.name!)(category bitmask is \(nodeBBitMask))")
+    }
     
 }
