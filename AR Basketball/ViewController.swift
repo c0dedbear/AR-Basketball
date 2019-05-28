@@ -12,12 +12,26 @@ import ARKit
 
 class ViewController: UIViewController {
     
+    //MARK: OUTLETS
+    @IBOutlet weak var accuracyLabel: UILabel!
+    @IBOutlet weak var scoreLabel: UILabel!
     @IBOutlet var sceneView: ARSCNView!
     
-    var ballsCounter = 0
+    //MARK: PROPERTIES
+    var throwedBalls = 0
     var score = 0
+    var accuracy: Int {
+        if score > 0 {
+           return (score / 2) * 100 / throwedBalls
+        } else {
+            return 0
+        }
+    }
     
     var isHoopPlaced = false
+    var isBallBeginContactWithRim = false
+    var isBallEndContactWithRim = false
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -99,9 +113,9 @@ extension ViewController {
         
         //add the same position that rim set
         topPlane.worldPosition = rim.worldPosition
-        topPlane.position.y += 0.1
+        topPlane.position.y += 0.45
         bottomPlane.worldPosition = topPlane.worldPosition
-        bottomPlane.position.y -= 0.6
+        bottomPlane.position.y -= 1.3
         
         //setup physics bodies
         topPlane.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(node: topPlane, options: [SCNPhysicsShape.Option.type: SCNPhysicsShape.ShapeType.concavePolyhedron]))
@@ -146,6 +160,7 @@ extension ViewController {
         let physicsBody = SCNPhysicsBody(type: .dynamic, shape: SCNPhysicsShape(node: ball))
         ball.physicsBody = physicsBody
         physicsBody.categoryBitMask = ObjectCollisionCategory.ball.rawValue
+        physicsBody.collisionBitMask = ObjectCollisionCategory.ball.rawValue
         physicsBody.contactTestBitMask = ObjectCollisionCategory.topPlane.rawValue | ObjectCollisionCategory.bottomPlane.rawValue
         
         
@@ -159,10 +174,11 @@ extension ViewController {
         
         
         sceneView.scene.rootNode.addChildNode(ball)
-        ballsCounter += 1
+        throwedBalls += 1
+        accuracyLabel.text = "Accuracy: \(accuracy)%"
     }
     
-    /// Remove node with name from scene when it's fall down
+    /// Remove node with name from scene when it's falls down too low
     ///
     /// - Parameters:
     ///   - node: SCNNode
@@ -215,10 +231,30 @@ extension ViewController: ARSCNViewDelegate {
 extension ViewController: SCNPhysicsContactDelegate {
     
     func physicsWorld(_ world: SCNPhysicsWorld, didBegin contact: SCNPhysicsContact) {
-        guard let nodeABitMask = contact.nodeA.physicsBody?.categoryBitMask else { return }
-        guard let nodeBBitMask = contact.nodeB.physicsBody?.categoryBitMask else { return }
         
-        print(Date(), #function, "\(contact.nodeA.name!)(category bitmask is \(nodeABitMask)) contacts with \(contact.nodeB.name!)(category bitmask is \(nodeBBitMask))")
+        if contact.nodeA.name == "Ball" && contact.nodeB.name == "Top plane" && !isBallBeginContactWithRim {
+                isBallBeginContactWithRim = true
+                isBallEndContactWithRim = false
+        print(Date(), #function, "\(contact.nodeA.name!) begin contact with \(contact.nodeB.name!)")
+        }
+        
+        
+    }
+    
+    func physicsWorld(_ world: SCNPhysicsWorld, didEnd contact: SCNPhysicsContact) {
+
+        if isBallBeginContactWithRim && !isBallEndContactWithRim {
+            if contact.nodeA.name == "Ball" && contact.nodeB.name == "Bottom plane" {
+                isBallEndContactWithRim = true
+                score += 2
+                print(Date(), #function, "\(contact.nodeA.name!) end contact with \(contact.nodeB.name!)")
+                DispatchQueue.main.async {
+                    self.scoreLabel.text = "Score: \(self.score)"
+                    self.accuracyLabel.text = "Accuracy: \(self.accuracy)%"
+                }
+                isBallBeginContactWithRim = false
+            }
+        }
     }
     
 }
