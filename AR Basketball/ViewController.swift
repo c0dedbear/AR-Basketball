@@ -16,6 +16,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var accuracyLabel: UILabel!
     @IBOutlet weak var scoreLabel: UILabel!
     @IBOutlet var sceneView: ARSCNView!
+    @IBOutlet weak var tipsLabels: UILabel!
     
     //MARK: PROPERTIES
     var throwedBalls = 0
@@ -31,7 +32,6 @@ class ViewController: UIViewController {
     var isHoopPlaced = false
     var isBallBeginContactWithRim = false
     var isBallEndContactWithRim = false
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -79,6 +79,7 @@ extension ViewController {
     @IBAction func screenTapped(_ sender: UITapGestureRecognizer) {
         
         if isHoopPlaced {
+            tipsLabels.isHidden = true
             createBasketball()
         } else {
             let location = sender.location(in: sceneView)
@@ -141,6 +142,10 @@ extension ViewController {
         sceneView.scene.rootNode.addChildNode(bottomPlane)
         sceneView.scene.rootNode.addChildNode(hoopNode)
         isHoopPlaced = true
+        self.tipsLabels.textColor = .orange
+        tipsLabels.text = "Tap to throw ball"
+        scoreLabel.isHidden = false
+        accuracyLabel.isHidden = false
     }
     
     
@@ -214,7 +219,11 @@ extension ViewController: ARSCNViewDelegate {
         planeNode.opacity = 0.125
         
         node.addChildNode(planeNode)
-        
+        DispatchQueue.main.async {
+             self.tipsLabels.textColor = .white
+             self.tipsLabels.text = "Founded surface, tap on blue area to setup Hoop"
+        }
+       
     }
     
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {

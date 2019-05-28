@@ -25,22 +25,30 @@
                                 </connections>
                             </arscnView>
                             <stackView opaque="NO" contentMode="scaleToFill" distribution="equalCentering" translatesAutoresizingMaskIntoConstraints="NO" id="x41-xN-35W" userLabel="Labels">
-                                <rect key="frame" x="8" y="52" width="398" height="30"/>
+                                <rect key="frame" x="8" y="52" width="398" height="0.0"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Score: 0" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="s5f-3Y-wKu">
-                                        <rect key="frame" x="0.0" y="0.0" width="93" height="30"/>
-                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="25"/>
-                                        <color key="textColor" red="0.73125990157329346" green="1" blue="0.33290982746039599" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                    <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Score: 0" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="s5f-3Y-wKu">
+                                        <rect key="frame" x="0.0" y="0.0" width="0.0" height="23.5"/>
+                                        <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="20"/>
+                                        <color key="textColor" red="1" green="0.60465256242615406" blue="0.38083655784777282" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Accuracy: 0%" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Huw-fH-dsW">
-                                        <rect key="frame" x="244" y="0.0" width="154" height="30"/>
-                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="25"/>
-                                        <color key="textColor" red="0.73125990157329346" green="1" blue="0.33290982746039599" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                    <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Accuracy: 0%" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Huw-fH-dsW">
+                                        <rect key="frame" x="0.0" y="0.0" width="0.0" height="23.5"/>
+                                        <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="20"/>
+                                        <color key="textColor" red="1" green="0.60465256242615406" blue="0.38083655784777282" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                 </subviews>
                             </stackView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZvH-aZ-c00">
+                                <rect key="frame" x="94" y="427.5" width="226" height="41"/>
+                                <string key="text">Please find contrast 
+vertical surface to place Hoop</string>
+                                <fontDescription key="fontDescription" type="system" weight="thin" pointSize="17"/>
+                                <color key="textColor" red="1" green="0.60465256242615406" blue="0.38083655784777282" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
@@ -49,9 +57,11 @@
                             <constraint firstItem="x41-xN-35W" firstAttribute="top" secondItem="fQZ-KI-GVf" secondAttribute="top" constant="8" id="UDY-sN-YXs"/>
                             <constraint firstItem="BrB-h1-WRS" firstAttribute="bottom" secondItem="fQZ-KI-GVf" secondAttribute="bottom" id="VpT-BR-CcM"/>
                             <constraint firstItem="BrB-h1-WRS" firstAttribute="trailing" secondItem="fQZ-KI-GVf" secondAttribute="trailing" id="XyZ-9z-H8e"/>
+                            <constraint firstItem="ZvH-aZ-c00" firstAttribute="centerX" secondItem="U0K-SW-4ec" secondAttribute="centerX" id="ddg-cP-Ljg"/>
                             <constraint firstItem="fQZ-KI-GVf" firstAttribute="trailing" secondItem="x41-xN-35W" secondAttribute="trailing" constant="8" id="mZr-Gw-dhs"/>
                             <constraint firstItem="BrB-h1-WRS" firstAttribute="top" secondItem="U0K-SW-4ec" secondAttribute="top" id="rJc-2c-zQA"/>
                             <constraint firstItem="x41-xN-35W" firstAttribute="centerX" secondItem="U0K-SW-4ec" secondAttribute="centerX" id="sr2-mV-XHU"/>
+                            <constraint firstItem="ZvH-aZ-c00" firstAttribute="centerY" secondItem="U0K-SW-4ec" secondAttribute="centerY" id="tkx-pJ-Z7U"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="fQZ-KI-GVf"/>
                     </view>
@@ -59,6 +69,7 @@
                         <outlet property="accuracyLabel" destination="Huw-fH-dsW" id="Xvv-L7-72h"/>
                         <outlet property="sceneView" destination="BrB-h1-WRS" id="5nT-qQ-ynl"/>
                         <outlet property="scoreLabel" destination="s5f-3Y-wKu" id="LVe-Sq-Q2V"/>
+                        <outlet property="tipsLabels" destination="ZvH-aZ-c00" id="LKp-QQ-ozE"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SZV-WD-TEh" sceneMemberID="firstResponder"/>
