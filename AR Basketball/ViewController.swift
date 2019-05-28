@@ -43,7 +43,7 @@ class ViewController: UIViewController {
         sceneView.scene.physicsWorld.contactDelegate = self
         
         // Show statistics such as fps and timing information
-        sceneView.showsStatistics = true
+       // sceneView.showsStatistics = true
         
         //enable auto light
         sceneView.autoenablesDefaultLighting = true
@@ -141,9 +141,13 @@ extension ViewController {
         sceneView.scene.rootNode.addChildNode(topPlane)
         sceneView.scene.rootNode.addChildNode(bottomPlane)
         sceneView.scene.rootNode.addChildNode(hoopNode)
+        
+        DispatchQueue.main.async {
+            self.tipsLabels.textColor = .orange
+            self.tipsLabels.text = "Tap to throw ball"
+        }
+        
         isHoopPlaced = true
-        self.tipsLabels.textColor = .orange
-        tipsLabels.text = "Tap to throw ball"
         scoreLabel.isHidden = false
         accuracyLabel.isHidden = false
     }
